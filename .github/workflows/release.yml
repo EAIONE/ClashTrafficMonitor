@@ -1,0 +1,32 @@
+name: Windows release
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Test core
+        run: dotnet run --project tests/Tests.csproj -c Release
+      - name: Build portable package
+        shell: pwsh
+        run: |
+          dotnet publish src/ClashTrafficMonitor.csproj -c Release -r win-x64 --self-contained true -o release/ClashTrafficMonitor
+          if ($LASTEXITCODE -ne 0) { throw 'Publish failed' }
+          Copy-Item README.md release/ClashTrafficMonitor/
+          Compress-Archive release/ClashTrafficMonitor release/ClashTrafficMonitor-Windows.zip
+      - name: Publish download
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          $tag = 'windows-' + (Get-Date -Format yyyy.MM.dd) + '.' + '${{ github.run_number }}'
+          gh release create $tag release/ClashTrafficMonitor-Windows.zip --target '${{ github.sha }}' --title "ClashTrafficMonitor $tag" --notes 'Windows portable build with runtime included. No personal traffic history, subscriptions or configuration included. Requires compatible Clash/mihomo local controller.'
