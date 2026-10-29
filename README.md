@@ -37,7 +37,7 @@ dotnet publish src/ClashTrafficMonitor.csproj -c Release -o app --no-self-contai
 
 ## 界面预览
 
-以下为当前程序控件导出的演示界面，示例数据不代表真实流量记录。
+第一张是程序在主窗口中的实际运行截图（程序名一列已打码），后两张为控件导出的演示界面，示例数据不代表真实流量记录。
 
 ![程序用量与排序](docs/screenshots/overview.png)
 ![本地历史明细](docs/screenshots/history.png)
